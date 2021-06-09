@@ -4,7 +4,7 @@ services:
     env_file: ./.env.dev
     build:
       context: .
-    container_name: gnfinder-doc
+    container_name: gndoc
     depends_on:
       - tika
   tika:
