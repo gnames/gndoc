@@ -6,6 +6,7 @@ require (
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/gnames/gnfmt v0.1.0
 	github.com/gnames/gnsys v0.1.1
+	github.com/google/go-tika v0.1.21
 	github.com/gopherjs/gopherjs v0.0.0-20200217142428-fce0ec30dd00 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/magiconair/properties v1.8.5 // indirect
@@ -18,6 +19,7 @@ require (
 	github.com/spf13/cobra v1.1.3
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/viper v1.7.1
+	github.com/stretchr/testify v1.7.0
 	golang.org/x/mod v0.4.2 // indirect
 	golang.org/x/net v0.0.0-20210420210106-798c2154c571 // indirect
 	golang.org/x/sys v0.0.0-20210420205809-ac73e9fd8988 // indirect
