@@ -61,12 +61,8 @@ func TestDoc(t *testing.T) {
 		assert.Nil(t, err)
 		txt, err := d.GetContent(f)
 		assert.Nil(t, err)
-		// if v.msg == "pdf img" {
-		// 	fmt.Printf("txt: %s\n", txt)
-		// }
 		assert.Contains(t, txt, v.text, v.msg)
 		assert.Equal(t, d.Content(), txt)
 		f.Close()
-
 	}
 }

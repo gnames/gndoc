@@ -52,7 +52,7 @@ type cfgData struct {
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "gndoc",
+	Use:   "gndoc [flags] docfile",
 	Short: "Finds scientific names in documents and images",
 
 	Long: `gndoc takes file name and returns back scientific names found in that
@@ -70,9 +70,14 @@ var rootCmd = &cobra.Command{
 		if versionFlag(cmd) {
 			os.Exit(0)
 		}
+		if port := portFlag(cmd); port > 0 {
+			fmt.Println("...web stuff here...")
+			os.Exit(0)
+		}
+
 		formatFlag(cmd)
 		tikaURLFlag(cmd)
-		portFlag(cmd)
+
 		cfg := gndoc.NewConfig(opts...)
 		_ = cfg
 	},

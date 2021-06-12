@@ -6,3 +6,9 @@ var (
 	// Build timestamp
 	Build = "n/a"
 )
+
+type FullVersion struct {
+	Version         string
+	Build           string
+	GNfinderVersion string
+}
