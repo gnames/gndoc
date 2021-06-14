@@ -3,6 +3,8 @@ package doc
 import "io"
 
 type Doc interface {
+	ContentFromFile(path string) (string, float32, error)
+
 	GetContent(io.Reader) (string, error)
 	Content() string
 

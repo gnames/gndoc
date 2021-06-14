@@ -23,13 +23,21 @@ package cmd
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
+	"time"
 
 	_ "embed"
 
 	"github.com/gnames/gndoc"
+	"github.com/gnames/gndoc/ent/doc"
+	"github.com/gnames/gnfinder"
+	"github.com/gnames/gnfinder/config"
+	"github.com/gnames/gnfinder/ent/nlp"
+	"github.com/gnames/gnfinder/ent/verifier"
+	"github.com/gnames/gnfinder/io/dict"
 	"github.com/gnames/gnsys"
 	"github.com/spf13/cobra"
 
@@ -67,6 +75,7 @@ var rootCmd = &cobra.Command{
 	`,
 
 	Run: func(cmd *cobra.Command, args []string) {
+		var err error
 		if versionFlag(cmd) {
 			os.Exit(0)
 		}
@@ -77,9 +86,35 @@ var rootCmd = &cobra.Command{
 
 		formatFlag(cmd)
 		tikaURLFlag(cmd)
-
 		cfg := gndoc.NewConfig(opts...)
-		_ = cfg
+		var data, source string
+		var convDur float32
+		switch len(args) {
+		case 0:
+			if !checkStdin() {
+				_ = cmd.Help()
+				os.Exit(0)
+			}
+			bs, err := io.ReadAll(os.Stdin)
+			if err != nil {
+				log.Println(err)
+			}
+			data = string(bs)
+			source = "STDIN"
+		case 1:
+			source = args[0]
+
+			d := doc.NewDoc(cfg.TikaURL)
+			data, convDur, err = d.ContentFromFile(source)
+			if err != nil {
+				log.Println(err)
+				os.Exit(1)
+			}
+		default:
+			_ = cmd.Help()
+			os.Exit(0)
+		}
+		findNames(data, cfg, source, convDur)
 	},
 }
 
@@ -170,4 +205,36 @@ func createConfig(path string, file string) {
 	if err != nil {
 		log.Fatalf("Cannot write to file %s: %s", path, err)
 	}
+}
+
+func checkStdin() bool {
+	stdInFile := os.Stdin
+	stat, err := stdInFile.Stat()
+	if err != nil {
+		log.Panic(err)
+	}
+	return (stat.Mode() & os.ModeCharDevice) == 0
+}
+
+func findNames(
+	data string,
+	cfg gndoc.Config,
+	source string,
+	convDur float32,
+) {
+	gnfCfg := config.New()
+	gnfDict := dict.LoadDictionary()
+	gnfWeights := nlp.BayesWeights()
+	gnf := gnfinder.New(gnfCfg, gnfDict, gnfWeights)
+	res := gnf.Find(source, data)
+	res.Meta.FileConversionSec = convDur
+
+	if gnf.GetConfig().WithVerification {
+		verif := verifier.New(gnf.GetConfig().PreferredSources)
+		start := time.Now()
+		verifiedNames := verif.Verify(res.UniqueNameStrings())
+		dur := float32(time.Now().Sub(start)) / float32(time.Second)
+		res.MergeVerification(verifiedNames, dur)
+	}
+	fmt.Println(res.Format(cfg.Format))
 }

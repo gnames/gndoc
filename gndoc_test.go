@@ -6,6 +6,11 @@ import (
 	"testing"
 
 	"github.com/gnames/gndoc"
+	"github.com/gnames/gndoc/ent/doc"
+	"github.com/gnames/gnfinder"
+	gnfc "github.com/gnames/gnfinder/config"
+	"github.com/gnames/gnfinder/ent/nlp"
+	"github.com/gnames/gnfinder/io/dict"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -57,26 +62,30 @@ func TestFileToText(t *testing.T) {
 	}
 
 	cfg := gndoc.NewConfig()
-	gnd := gndoc.New(cfg)
+	d := doc.NewDoc(cfg.TikaURL)
 	for _, v := range tests {
 		path := filepath.Join("testdata", v.file)
-		doc, err := gnd.FileToText(path)
+		txt, _, err := d.ContentFromFile(path)
 		assert.Equal(t, err != nil, v.hasError)
 		if !v.hasError {
-			assert.Contains(t, doc.Content(), v.text)
+			assert.Contains(t, txt, v.text)
 		}
 	}
 }
 
 func TestFind(t *testing.T) {
 	cfg := gndoc.NewConfig()
-	gnd := gndoc.New(cfg)
+	d := doc.NewDoc(cfg.TikaURL)
 	path := filepath.Join("testdata", "utf8.txt")
-	doc, err := gnd.FileToText(path)
+	doc, _, err := d.ContentFromFile(path)
 	assert.Nil(t, err)
 
 	t.Run("default find", func(t *testing.T) {
-		o := gnd.Find(doc)
+		cfg := gnfc.New()
+		d := dict.LoadDictionary()
+		weights := nlp.BayesWeights()
+		gnf := gnfinder.New(cfg, d, weights)
+		o := gnf.Find("", doc)
 		assert.Greater(t, len(o.Names), 0)
 	})
 }

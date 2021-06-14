@@ -2,9 +2,12 @@ package doc
 
 import (
 	"context"
+	"fmt"
 	"io"
+	"os"
 	"time"
 
+	"github.com/gnames/gnsys"
 	"github.com/google/go-tika/tika"
 )
 
@@ -22,6 +25,29 @@ func NewDoc(tikaURL string) Doc {
 	return &doc{
 		client: client,
 	}
+}
+
+func (d *doc) ContentFromFile(path string) (string, float32, error) {
+	var dur float32
+	start := time.Now()
+	exists, err := gnsys.FileExists(path)
+	if err != nil {
+		return "", dur, err
+	}
+	if !exists {
+		return "", dur, fmt.Errorf("File '%s' does not exist", path)
+	}
+
+	f, err := os.Open(path)
+	if err != nil {
+		return "", dur, err
+	}
+	txt, err := d.GetContent(f)
+	if err != nil {
+		return "", dur, err
+	}
+	dur = float32(time.Now().Sub(start)) / float32(time.Second)
+	return txt, dur, nil
 }
 
 func (d *doc) GetMeta(input io.Reader) (string, error) {

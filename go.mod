@@ -4,7 +4,7 @@ go 1.16
 
 require (
 	github.com/gnames/bayes v0.1.3 // indirect
-	github.com/gnames/gnfinder v0.12.1
+	github.com/gnames/gnfinder v0.13.0
 	github.com/gnames/gnfmt v0.1.0
 	github.com/gnames/gnsys v0.1.1
 	github.com/google/go-tika v0.1.21

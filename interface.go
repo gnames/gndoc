@@ -6,7 +6,6 @@ import (
 )
 
 type GNdoc interface {
-	FileToText(string) (doc.Doc, error)
 	Find(doc.Doc) output.Output
 	GetConfig() Config
 	ChangeConfig(opts ...Option) GNdoc
