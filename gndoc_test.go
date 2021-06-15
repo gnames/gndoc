@@ -1,91 +1,66 @@
 package gndoc_test
 
 import (
+	"fmt"
+	"log"
+	"os"
 	"path/filepath"
-	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/gnames/gndoc"
-	"github.com/gnames/gndoc/ent/doc"
-	"github.com/gnames/gnfinder"
-	gnfc "github.com/gnames/gnfinder/config"
-	"github.com/gnames/gnfinder/ent/nlp"
-	"github.com/gnames/gnfinder/io/dict"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNew(t *testing.T) {
-	t.Run("default options", func(t *testing.T) {
-		cfg := gndoc.NewConfig()
-		gnd := gndoc.New(cfg)
-		assert.Equal(t, gnd.GetConfig().TikaURL, "https://tika.globalnames.org")
-	})
+var tikaURL = "https://tika.globalnames.org"
 
-	t.Run("options", func(t *testing.T) {
-		opts := []gndoc.Option{
-			gndoc.OptTikaURL("https://example.org"),
-		}
-		cfg := gndoc.NewConfig(opts...)
-		gnd := gndoc.New(cfg)
-		assert.Equal(t, gnd.GetConfig().TikaURL, "https://example.org")
-	})
-}
-
-func TestGetVersion(t *testing.T) {
-	cfg := gndoc.NewConfig()
-	gnd := gndoc.New(cfg)
-	ver := gnd.GetVersion()
-	assert.Regexp(t, regexp.MustCompile(`^v`), ver.Version)
-	assert.Regexp(t, regexp.MustCompile(`^v`), ver.GNfinderVersion)
-	assert.True(t, len(ver.Build) > 0)
-}
-
-func TestChangeConfig(t *testing.T) {
-	cfg := gndoc.NewConfig()
-	gnd := gndoc.New(cfg)
-	assert.Equal(t, gnd.GetConfig().TikaURL, "https://tika.globalnames.org")
-	opts := []gndoc.Option{
-		gndoc.OptTikaURL("https://example.org"),
-	}
-	gnd2 := gnd.ChangeConfig(opts...)
-	assert.Equal(t, gnd.GetConfig().TikaURL, "https://tika.globalnames.org")
-	assert.Equal(t, gnd2.GetConfig().TikaURL, "https://example.org")
-}
-
-func TestFileToText(t *testing.T) {
+func TestDoc(t *testing.T) {
 	tests := []struct {
-		msg, file, text string
-		hasError        bool
+		msg, file, text, meta, lang string
 	}{
-		{"bad", "nofile.txt", "", true},
-		{"txt", "utf8.txt", "Holarctic genus", false},
+		{"abbr", "abbreviations.txt", "sister species", "text/plain", "en"},
+		{"ascii", "ascii.txt", "no unicode", "text/plain", "en"},
+		{"big", "big.txt", "Tacsonia insignis, 38", "text/plain", "en"},
+		{"binary", "binary", "", "application/x-executable", "en"},
+		{"json", "dirty_names.json", "Rhus folirsternatis", "text/plain", "en"},
+		// why language is detected as Thai?
+		{"ms doc", "file.docx", "Global Names", "Microsoft Office Word", "th"},
+		{"html", "file.html", "Aesculus", "text/html", "en"},
+		// why language is detected as Thai?
+		{"pdf", "file.pdf", "sabana de Bogotá", "application/pdf", "th"},
+		// why language is detected as Thai?
+		{"xlsx", "file.xlsx", "Uhler, 1872", "LibreOffice_project", "th"},
+		{"xml", "file.xml", "fishes of New Zealand", "application/xml", "en"},
+		{"jpg", "image.jpg", "Baccha occurs in Ontario", "image/jpeg", "th"},
+		{"pdf img", "image.pdf", "", "application/pdf", "th"},
+		{"italian", "italian.txt", "per il foro della", "text/plain", "it"},
+		{"latin1", "latin1.txt", "(Ujvárosi 2005)", "charset=ISO-8859-1", "en"},
+		{"utf16", "utf16.txt", "avons également reçu", "text/plain", "fr"},
 	}
 
-	cfg := gndoc.NewConfig()
-	d := doc.NewDoc(cfg.TikaURL)
 	for _, v := range tests {
-		path := filepath.Join("testdata", v.file)
-		txt, _, err := d.ContentFromFile(path)
-		assert.Equal(t, err != nil, v.hasError)
-		if !v.hasError {
-			assert.Contains(t, txt, v.text)
-		}
+		d := gndoc.New(tikaURL)
+
+		f, err := os.Open(filepath.Join("testdata", v.file))
+		assert.Nil(t, err)
+		assert.Nil(t, err)
+		txt, err := d.GetText(f)
+		assert.Nil(t, err)
+		assert.Contains(t, txt, v.text, v.msg)
+		assert.Equal(t, d.Text(), txt)
+		f.Close()
 	}
 }
 
-func TestFind(t *testing.T) {
-	cfg := gndoc.NewConfig()
-	d := doc.NewDoc(cfg.TikaURL)
-	path := filepath.Join("testdata", "utf8.txt")
-	doc, _, err := d.ContentFromFile(path)
-	assert.Nil(t, err)
-
-	t.Run("default find", func(t *testing.T) {
-		cfg := gnfc.New()
-		d := dict.LoadDictionary()
-		weights := nlp.BayesWeights()
-		gnf := gnfinder.New(cfg, d, weights)
-		o := gnf.Find("", doc)
-		assert.Greater(t, len(o.Names), 0)
-	})
+func Example() {
+	gnd := gndoc.New(tikaURL)
+	path := filepath.Join("testdata/file.pdf")
+	txt, _, err := gnd.TextFromFile(path)
+	if err != nil {
+		log.Fatal(err)
+	}
+	hasText := strings.Contains(txt, "sabana de Bogotá")
+	fmt.Printf("%v", hasText)
+	// Output:
+	// true
 }

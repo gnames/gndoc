@@ -1,5 +1,0 @@
-# Format of the output. Can be 'csv', 'compact', 'pretty'.
-# Format: csv
-
-# TikaURL is a URL to Apache Tika REST API
-# VerifierURL: "https://tika.globalnames.org/"

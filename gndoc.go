@@ -1,51 +1,69 @@
 package gndoc
 
 import (
-	"github.com/gnames/gndoc/ent/doc"
-	"github.com/gnames/gnfinder"
-	gnfc "github.com/gnames/gnfinder/config"
-	"github.com/gnames/gnfinder/ent/nlp"
-	"github.com/gnames/gnfinder/ent/output"
-	"github.com/gnames/gnfinder/io/dict"
+	"context"
+	"fmt"
+	"io"
+	"os"
+	"time"
+
+	"github.com/gnames/gnsys"
+	"github.com/google/go-tika/tika"
 )
 
+var timeout = 5 * time.Second
+
 type gndoc struct {
-	Config
-	gnf gnfinder.GNfinder
+	client *tika.Client
+	text   string
 }
 
-func New(cfg Config) GNdoc {
-	dict := dict.LoadDictionary()
-	weights := nlp.BayesWeights()
-	gnfConfig := gnfc.New()
-	gnd := gndoc{
-		Config: cfg,
-		gnf:    gnfinder.New(gnfConfig, dict, weights),
+func New(tikaURL string) GNdoc {
+	client := tika.NewClient(nil, tikaURL)
+	return &gndoc{
+		client: client,
 	}
-	return gnd
 }
 
-func (gnd gndoc) Find(d doc.Doc) output.Output {
-	return gnd.gnf.Find("", d.Content())
-}
-
-func (gnd gndoc) GetConfig() Config {
-	return gnd.Config
-}
-
-func (gnd gndoc) ChangeConfig(opts ...Option) GNdoc {
-	for _, opt := range opts {
-		opt(&gnd.Config)
+// TextFromFile takes a path to a file, and returns the converted
+// UTF8-encoded text, elapsed time in seconds or an error.
+func (d *gndoc) TextFromFile(path string) (string, float32, error) {
+	var dur float32
+	start := time.Now()
+	exists, err := gnsys.FileExists(path)
+	if err != nil {
+		return "", dur, err
 	}
-	return gnd
+	if !exists {
+		return "", dur, fmt.Errorf("File '%s' does not exist", path)
+	}
+
+	f, err := os.Open(path)
+	if err != nil {
+		return "", dur, err
+	}
+	txt, err := d.GetText(f)
+	if err != nil {
+		return "", dur, err
+	}
+	dur = float32(time.Now().Sub(start)) / float32(time.Second)
+	return txt, dur, nil
 }
 
-func (gnd gndoc) GetVersion() FullVersion {
-	gnfver := gnd.gnf.GetVersion()
-	res := FullVersion{
-		Version:         Version,
-		Build:           Build,
-		GNfinderVersion: gnfver.Version,
+// GetText takes a io.Reader interface (for example opened file)
+// and returns back the UTF8-encoded textual content of the input.
+func (d *gndoc) GetText(input io.Reader) (string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+	txt, err := d.client.Parse(ctx, input)
+	if err == nil {
+		d.text = txt
 	}
-	return res
+	return txt, err
+}
+
+// Text returns the UTF8-encoded textual content of a file, if it was
+// already received by running other methods.
+func (d *gndoc) Text() string {
+	return d.text
 }
