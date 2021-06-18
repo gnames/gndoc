@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.2.0]
+
+- Add [#7]: add a flag for UTF8 texts to treat them locally without Tika.
+
 ## [v0.1.0]
 
 - Add [#7]: convert GNdoc into library only for extracting text from files.
