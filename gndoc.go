@@ -27,8 +27,14 @@ func New(tikaURL string) GNdoc {
 
 // TextFromFile takes a path to a file, and returns the converted
 // UTF8-encoded text, elapsed time in seconds or an error.
-func (d *gndoc) TextFromFile(path string) (string, float32, error) {
+func (d *gndoc) TextFromFile(
+	path string,
+	plainInput bool,
+) (string, float32, error) {
+	var err error
+	var txt string
 	var dur float32
+
 	start := time.Now()
 	exists, err := gnsys.FileExists(path)
 	if err != nil {
@@ -42,9 +48,20 @@ func (d *gndoc) TextFromFile(path string) (string, float32, error) {
 	if err != nil {
 		return "", dur, err
 	}
-	txt, err := d.GetText(f)
-	if err != nil {
-		return "", dur, err
+	defer f.Close()
+	if plainInput {
+		bs, err := io.ReadAll(f)
+		txt = string(bs)
+		dur = float32(time.Now().Sub(start)) / float32(time.Second)
+		if err != nil {
+			return "", dur, err
+		}
+		return txt, dur, nil
+	} else {
+		txt, err = d.GetText(f)
+		if err != nil {
+			return "", dur, err
+		}
 	}
 	dur = float32(time.Now().Sub(start)) / float32(time.Second)
 	return txt, dur, nil
