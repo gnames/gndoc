@@ -11,7 +11,7 @@ import (
 	"github.com/google/go-tika/tika"
 )
 
-var timeout = 5 * time.Second
+var timeout = 15 * time.Second
 
 type gndoc struct {
 	client *tika.Client
