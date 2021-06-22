@@ -67,6 +67,13 @@ func (d *gndoc) TextFromFile(
 	return txt, dur, nil
 }
 
+// TextFromURL takes a URL to a page, reads its content, and converts it into
+// a plain UTF8-encoded text. If it succeeds it returns the text, the time it
+// spend on conversion, and a nil.  If it does not succeed, it returns an
+// empty string and error.
+func (d *gndoc) TextFromURL(url string) (string, err) {
+}
+
 // GetText takes a io.Reader interface (for example opened file)
 // and returns back the UTF8-encoded textual content of the input.
 func (d *gndoc) GetText(input io.Reader) (string, error) {
