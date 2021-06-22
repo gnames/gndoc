@@ -52,6 +52,14 @@ func TestDoc(t *testing.T) {
 	}
 }
 
+func TestTextFromURL(t *testing.T) {
+	d := gndoc.New(tikaURL)
+	txt, _, err := d.TextFromURL("https://example.org")
+	assert.Nil(t, err)
+	assert.Contains(t, txt, "Example")
+	assert.NotContains(t, txt, "<html>")
+}
+
 func Example() {
 	gnd := gndoc.New(tikaURL)
 	path := filepath.Join("testdata/file.pdf")
@@ -69,7 +77,16 @@ func Example() {
 	}
 	hasText = strings.Contains(txt, "Holarctic genus")
 	fmt.Printf("%v\n", hasText)
+
+	url := "https://example.org"
+	txt, _, err = gnd.TextFromURL(url)
+	if err != nil {
+		log.Fatal(err)
+	}
+	hasText = strings.Contains(txt, "Example")
+	fmt.Printf("%v\n", hasText)
 	// Output:
+	// true
 	// true
 	// true
 }

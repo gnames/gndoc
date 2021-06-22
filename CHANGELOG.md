@@ -1,8 +1,12 @@
 # Changelog
 
+## [v0.3.0]
+
+- Add [#9]: add a method to read texts from URLs.
+
 ## [v0.2.0]
 
-- Add [#7]: add a flag for UTF8 texts to treat them locally without Tika.
+- Add [#8]: add a flag for UTF8 texts to treat them locally without Tika.
 
 ## [v0.1.0]
 
@@ -15,6 +19,8 @@
 
 This document follows [changelog guidelines]
 
+[v0.3.0]: https://github.com/gnames/gndoc/compare/v0.2.0...v0.3.0
+[v0.2.0]: https://github.com/gnames/gndoc/compare/v0.1.0...v0.2.0
 [v0.1.0]: https://github.com/gnames/gndoc/tree/v0.1.0
 
 [#10]: https://github.com/gnames/gndoc/issues/10

@@ -37,8 +37,18 @@ func Example() {
   }
   hasText = strings.Contains(txt, "Holarctic genus")
   fmt.Printf("%v\n", hasText)
+
+  url := "https://example.org"
+  txt, _, err = gnd.TextFromURL(url)
+  if err != nil {
+    log.Fatal(err)
+  }
+  hasText = strings.Contains(txt, "Example")
+  fmt.Printf("%v\n", hasText)
+}
+
   // Output:
   // true
   // true
-}
+  // true
 ```
