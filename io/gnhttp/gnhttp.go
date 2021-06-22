@@ -37,28 +37,27 @@ func New(opts ...Option) GNhttp {
 	return &h
 }
 
-func (h *gnhttp) Get(url string) (int, string, []byte, error) {
+func (h *gnhttp) Get(url string) (int, string, io.Reader, error) {
 	var code int
-	var body []byte
-	var rw bytes.ReaderWriter(body)
 	var mime string
+	var body bytes.Buffer
 
 	ctx, cancel := context.WithTimeout(context.Background(), h.reqMax)
 	defer cancel()
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
-		return code, mime, body, err
+		return code, mime, nil, err
 	}
 
 	res, err := h.client.Do(req)
 	if res != nil {
 		defer res.Body.Close()
-		io.Copy(body, res.Body)
+		io.Copy(&body, res.Body)
 		code = res.StatusCode
 		mime = "mime"
 	}
-	return code, mime, body, err
+	return code, mime, &body, err
 }
 
 func (h *gnhttp) ConnMax(d time.Duration) {
