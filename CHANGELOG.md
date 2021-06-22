@@ -4,6 +4,10 @@
 
 - Add [#9]: add a method to read texts from URLs.
 
+## [v0.2.1]
+
+- Add: Increase wait time for tika to 15 sec.
+
 ## [v0.2.0]
 
 - Add [#8]: add a flag for UTF8 texts to treat them locally without Tika.
@@ -19,7 +23,8 @@
 
 This document follows [changelog guidelines]
 
-[v0.3.0]: https://github.com/gnames/gndoc/compare/v0.2.0...v0.3.0
+[v0.3.0]: https://github.com/gnames/gndoc/compare/v0.2.1...v0.3.0
+[v0.2.1]: https://github.com/gnames/gndoc/compare/v0.2.0...v0.2.1
 [v0.2.0]: https://github.com/gnames/gndoc/compare/v0.1.0...v0.2.0
 [v0.1.0]: https://github.com/gnames/gndoc/tree/v0.1.0
 
