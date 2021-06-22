@@ -14,14 +14,14 @@ import (
 var timeout = 5 * time.Second
 
 type gndoc struct {
-	client *tika.Client
-	text   string
+	tclient *tika.Client
+	text    string
 }
 
 func New(tikaURL string) GNdoc {
-	client := tika.NewClient(nil, tikaURL)
+	tclient := tika.NewClient(nil, tikaURL)
 	return &gndoc{
-		client: client,
+		tclient: tclient,
 	}
 }
 
@@ -71,7 +71,8 @@ func (d *gndoc) TextFromFile(
 // a plain UTF8-encoded text. If it succeeds it returns the text, the time it
 // spend on conversion, and a nil.  If it does not succeed, it returns an
 // empty string and error.
-func (d *gndoc) TextFromURL(url string) (string, err) {
+func (d *gndoc) TextFromURL(url string) (string, float32, error) {
+	return "", 0, nil
 }
 
 // GetText takes a io.Reader interface (for example opened file)
@@ -79,7 +80,7 @@ func (d *gndoc) TextFromURL(url string) (string, err) {
 func (d *gndoc) GetText(input io.Reader) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
-	txt, err := d.client.Parse(ctx, input)
+	txt, err := d.tclient.Parse(ctx, input)
 	if err == nil {
 		d.text = txt
 	}
