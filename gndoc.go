@@ -34,6 +34,7 @@ func (d *gndoc) TextFromFile(
 	plainInput bool,
 ) (string, float32, error) {
 	var err error
+	var bs []byte
 	var txt string
 	var dur float32
 
@@ -43,7 +44,7 @@ func (d *gndoc) TextFromFile(
 		return "", dur, err
 	}
 	if !exists {
-		return "", dur, fmt.Errorf("File '%s' does not exist", path)
+		return "", dur, fmt.Errorf("file '%s' does not exist", path)
 	}
 
 	f, err := os.Open(path)
@@ -52,9 +53,9 @@ func (d *gndoc) TextFromFile(
 	}
 	defer f.Close()
 	if plainInput {
-		bs, err := io.ReadAll(f)
+		bs, err = io.ReadAll(f)
 		txt = string(bs)
-		dur = float32(time.Now().Sub(start)) / float32(time.Second)
+		dur = float32(time.Since(start)) / float32(time.Second)
 		if err != nil {
 			return "", dur, err
 		}
@@ -65,7 +66,7 @@ func (d *gndoc) TextFromFile(
 			return "", dur, err
 		}
 	}
-	dur = float32(time.Now().Sub(start)) / float32(time.Second)
+	dur = float32(time.Since(start)) / float32(time.Second)
 	return txt, dur, nil
 }
 
