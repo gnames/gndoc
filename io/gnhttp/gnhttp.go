@@ -19,8 +19,8 @@ type gnhttp struct {
 // New creates a new instance of GNhttp.
 func New(opts ...Option) GNhttp {
 	h := gnhttp{
-		connMax: 200 * time.Millisecond,
-		reqMax:  1000 * time.Millisecond,
+		connMax: 2000 * time.Millisecond,
+		reqMax:  2000 * time.Millisecond,
 	}
 	for _, opt := range opts {
 		opt(&h)
