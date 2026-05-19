@@ -93,7 +93,11 @@ func (d *gndoc) TextFromURL(url string) (string, float32, error) {
 	var dur float32
 	var err error
 	start := time.Now()
-	h := gnhttp.New(gnhttp.OptUserAgent(d.userAgent))
+	h := gnhttp.New(
+		gnhttp.OptUserAgent(d.userAgent),
+		gnhttp.OptConnMax(10*time.Second),
+		gnhttp.OptReqMax(60*time.Second),
+	)
 
 	_, mime, body, err := h.Get(url)
 	if err != nil {
