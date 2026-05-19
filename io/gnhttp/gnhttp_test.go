@@ -24,11 +24,14 @@ func TestOpts(t *testing.T) {
 	h := gnhttp.New()
 	assert.Equal(t, h.ConnMax(), 200*time.Millisecond)
 	assert.Equal(t, h.ReqMax(), 1000*time.Millisecond)
+	assert.Equal(t, h.UserAgent(), "")
 	opts := []gnhttp.Option{
 		gnhttp.OptConnMax(3 * time.Second),
 		gnhttp.OptReqMax(2 * time.Second),
+		gnhttp.OptUserAgent("test-agent/1.0"),
 	}
 	h = gnhttp.New(opts...)
 	assert.Equal(t, h.ConnMax(), 3000*time.Millisecond)
 	assert.Equal(t, h.ReqMax(), 2000*time.Millisecond)
+	assert.Equal(t, h.UserAgent(), "test-agent/1.0")
 }

@@ -22,4 +22,10 @@ type GNhttp interface {
 
 	// ReqMax returns wait time for processing an HTTP request.
 	ReqMax() time.Duration
+
+	// SetUserAgent sets the User-Agent header for requests.
+	SetUserAgent(string)
+
+	// UserAgent returns the User-Agent string used for requests.
+	UserAgent() string
 }

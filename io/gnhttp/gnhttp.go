@@ -10,8 +10,9 @@ import (
 )
 
 type gnhttp struct {
-	connMax time.Duration
-	reqMax  time.Duration
+	connMax   time.Duration
+	reqMax    time.Duration
+	userAgent string
 
 	client http.Client
 }
@@ -19,8 +20,8 @@ type gnhttp struct {
 // New creates a new instance of GNhttp.
 func New(opts ...Option) GNhttp {
 	h := gnhttp{
-		connMax: 2000 * time.Millisecond,
-		reqMax:  2000 * time.Millisecond,
+		connMax: 200 * time.Millisecond,
+		reqMax:  1000 * time.Millisecond,
 	}
 	for _, opt := range opts {
 		opt(&h)
@@ -48,6 +49,10 @@ func (h *gnhttp) Get(url string) (int, string, io.Reader, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return code, mime, nil, err
+	}
+	req.Header.Set("Accept", "text/html")
+	if h.userAgent != "" {
+		req.Header.Set("User-Agent", h.userAgent)
 	}
 
 	res, err := h.client.Do(req)
@@ -92,5 +97,20 @@ func OptConnMax(d time.Duration) Option {
 func OptReqMax(d time.Duration) Option {
 	return func(h GNhttp) {
 		h.SetReqMax(d)
+	}
+}
+
+func (h *gnhttp) SetUserAgent(ua string) {
+	h.userAgent = ua
+}
+
+func (h *gnhttp) UserAgent() string {
+	return h.userAgent
+}
+
+// OptUserAgent sets the User-Agent header for HTTP requests.
+func OptUserAgent(ua string) Option {
+	return func(h GNhttp) {
+		h.SetUserAgent(ua)
 	}
 }

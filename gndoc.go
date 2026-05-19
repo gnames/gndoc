@@ -16,15 +16,30 @@ import (
 var timeout = 15 * time.Second
 
 type gndoc struct {
-	tclient *tika.Client
-	text    string
+	tclient   *tika.Client
+	userAgent string
+	text      string
 }
 
-func New(tikaURL string) GNdoc {
+// Option modifies a GNdoc instance.
+type Option func(*gndoc)
+
+// OptUserAgent sets the User-Agent header used when fetching URLs.
+func OptUserAgent(ua string) Option {
+	return func(d *gndoc) {
+		d.userAgent = ua
+	}
+}
+
+func New(tikaURL string, opts ...Option) GNdoc {
 	tclient := tika.NewClient(nil, tikaURL)
-	return &gndoc{
+	d := &gndoc{
 		tclient: tclient,
 	}
+	for _, opt := range opts {
+		opt(d)
+	}
+	return d
 }
 
 // TextFromFile takes a path to a file, and returns the converted
@@ -78,7 +93,7 @@ func (d *gndoc) TextFromURL(url string) (string, float32, error) {
 	var dur float32
 	var err error
 	start := time.Now()
-	h := gnhttp.New()
+	h := gnhttp.New(gnhttp.OptUserAgent(d.userAgent))
 
 	_, mime, body, err := h.Get(url)
 	if err != nil {

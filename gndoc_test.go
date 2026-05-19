@@ -60,6 +60,14 @@ func TestTextFromURL(t *testing.T) {
 	assert.NotContains(t, txt, "<html>")
 }
 
+func TestTextFromURLWithUserAgent(t *testing.T) {
+	ua := "test-agent/1.0 (https://example.org)"
+	d := gndoc.New(tikaURL, gndoc.OptUserAgent(ua))
+	txt, _, err := d.TextFromURL("https://example.org")
+	assert.Nil(t, err)
+	assert.Contains(t, txt, "Example")
+}
+
 func Example() {
 	gnd := gndoc.New(tikaURL)
 	path := filepath.Join("testdata/file.pdf")
