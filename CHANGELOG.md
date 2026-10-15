@@ -1,5 +1,30 @@
 # Changelog
 
+## Unreleased
+
+- Add: convert plain texts, HTML, XML, PDF, DOCX, XLSX, PPTX and
+  OpenDocument files locally using Go modules. PDFs are converted by
+  PDFium (WebAssembly build via go-pdfium).
+- Add: Tika service is optional, it is used only as a fallback for formats
+  that cannot be converted locally (images, scanned PDFs etc.). Use an empty
+  Tika URL to disable it.
+- Add: `OptPreferTika` option to use Tika for all formats, with local
+  conversion as a fallback.
+- Add: `ErrUnsupported` error for formats that need Tika when it is disabled.
+- Add: BREAKING `TextFromFile`, `TextFromURL` and `GetText` return
+  `Result` with the text, detected MIME type, converter, conversion time,
+  and `OrigOffsets`, `OrigByteOffsets` flags that tell if character or byte
+  offsets in the text match the original input.
+- Add: plain texts keep BOM as U+FEFF, so character offsets match the input.
+- Add: UTF-8 texts with some invalid bytes are not decoded as Windows-1252,
+  invalid bytes are replaced with U+FFFD instead.
+- Add: `OptPDFCacheDir` option to cache compiled PDFium module on disk
+  for faster start of PDF conversion, and `DefaultPDFCacheDir` that returns
+  `~/.cache/gndoc`.
+- Add: BREAKING GNdoc is safe for concurrent use, `Text()` method is removed,
+  use `Result.Text` instead.
+- Add: minimal Go version is 1.26.
+
 ## [v0.3.0]
 
 - Add [#9]: add a method to read texts from URLs.
